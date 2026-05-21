@@ -1,0 +1,192 @@
+/* PREMIUM ADMIN LOGIN CSS */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI, Arial, sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+background:#0f172a;
+position:relative;
+}
+
+/* Animated Background */
+.bg{
+position:absolute;
+width:100%;
+height:100%;
+background:
+linear-gradient(135deg,#1e3a8a,#0f172a,#111827,#2563eb);
+background-size:400% 400%;
+animation:bgmove 12s ease infinite;
+z-index:1;
+}
+
+@keyframes bgmove{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+/* Login Card */
+.login-box{
+position:relative;
+z-index:10;
+width:100%;
+max-width:420px;
+padding:40px 35px;
+border-radius:22px;
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(18px);
+box-shadow:0 20px 40px rgba(0,0,0,.35);
+border:1px solid rgba(255,255,255,.12);
+color:white;
+animation:fadeUp .8s ease;
+}
+
+@keyframes fadeUp{
+from{
+opacity:0;
+transform:translateY(40px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+.login-box h1{
+font-size:34px;
+font-weight:800;
+text-align:center;
+margin-bottom:8px;
+letter-spacing:1px;
+}
+
+.login-box p{
+text-align:center;
+color:#cbd5e1;
+margin-bottom:28px;
+font-size:14px;
+}
+
+/* Error Message */
+.error{
+background:rgba(239,68,68,.15);
+border:1px solid rgba(239,68,68,.35);
+padding:12px;
+border-radius:10px;
+margin-bottom:18px;
+font-size:14px;
+text-align:center;
+color:#fecaca;
+}
+
+/* Inputs */
+.login-box input[type="text"],
+.login-box input[type="password"]{
+width:100%;
+padding:14px 16px;
+margin-bottom:16px;
+border:none;
+outline:none;
+border-radius:12px;
+background:rgba(255,255,255,.08);
+color:white;
+font-size:15px;
+transition:.3s;
+}
+
+.login-box input::placeholder{
+color:#cbd5e1;
+}
+
+.login-box input:focus{
+box-shadow:0 0 0 2px #3b82f6;
+background:rgba(255,255,255,.12);
+}
+
+/* Password Field */
+.password-wrap{
+position:relative;
+}
+
+.password-wrap span{
+position:absolute;
+right:14px;
+top:13px;
+cursor:pointer;
+font-size:18px;
+opacity:.8;
+transition:.2s;
+}
+
+.password-wrap span:hover{
+opacity:1;
+transform:scale(1.08);
+}
+
+/* Remember */
+.remember{
+display:flex;
+align-items:center;
+gap:8px;
+font-size:14px;
+color:#cbd5e1;
+margin-bottom:22px;
+}
+
+.remember input{
+accent-color:#2563eb;
+}
+
+/* Button */
+.login-box button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+background:linear-gradient(135deg,#2563eb,#3b82f6);
+color:white;
+font-size:16px;
+font-weight:700;
+cursor:pointer;
+transition:.3s;
+}
+
+.login-box button:hover{
+transform:translateY(-2px);
+box-shadow:0 14px 25px rgba(37,99,235,.35);
+}
+
+/* Footer */
+.login-box::after{
+content:"Secure Internal Access";
+display:block;
+text-align:center;
+margin-top:20px;
+font-size:12px;
+color:#94a3b8;
+letter-spacing:.5px;
+}
+
+/* Mobile */
+@media(max-width:500px){
+
+.login-box{
+margin:20px;
+padding:30px 22px;
+}
+
+.login-box h1{
+font-size:28px;
+}
+
+}

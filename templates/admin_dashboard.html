@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sydro CRM Dashboard</title>
+
+<link rel="stylesheet" href="/static/admin.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <h2>Sydro CRM Dashboard</h2>
+
+    <div>
+        <a href="/export-csv" class="btn">Export CSV</a>
+        <a href="/logout" class="btn logout">Logout</a>
+    </div>
+</div>
+
+
+<!-- SUMMARY CARDS -->
+<div class="cards">
+
+    <div class="card">
+        <h3>Total Leads</h3>
+        <p>{{ leads|length }}</p>
+    </div>
+
+    <div class="card">
+        <h3>New Leads</h3>
+        <p>
+        {% set count = namespace(value=0) %}
+        {% for row in status_data %}
+            {% if row[0] == 'New' %}
+                {% set count.value = row[1] %}
+            {% endif %}
+        {% endfor %}
+        {{ count.value }}
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Contacted</h3>
+        <p>
+        {% set count = namespace(value=0) %}
+        {% for row in status_data %}
+            {% if row[0] == 'Contacted' %}
+                {% set count.value = row[1] %}
+            {% endif %}
+        {% endfor %}
+        {{ count.value }}
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Closed</h3>
+        <p>
+        {% set count = namespace(value=0) %}
+        {% for row in status_data %}
+            {% if row[0] == 'Closed' %}
+                {% set count.value = row[1] %}
+            {% endif %}
+        {% endfor %}
+        {{ count.value }}
+        </p>
+    </div>
+
+</div>
+
+
+<!-- FILTERS -->
+<div class="filters">
+<form method="GET" action="/admin-dashboard">
+
+<input type="text" name="search" placeholder="Search name / email">
+
+<input type="date" name="from_date">
+
+<input type="date" name="to_date">
+
+<button type="submit">Filter</button>
+
+</form>
+</div>
+
+
+<!-- CHARTS -->
+<div class="charts-wrap">
+
+<div class="chart-box">
+<h3>Lead Status Overview</h3>
+<canvas id="statusChart"></canvas>
+</div>
+
+<div class="chart-box">
+<h3>Monthly Lead Growth</h3>
+<canvas id="monthlyChart"></canvas>
+</div>
+
+</div>
+
+
+<!-- TABLE -->
+<div class="table-wrap">
+
+<table>
+
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Email</th>
+<th>Phone</th>
+<th>Project</th>
+<th>Budget</th>
+<th>Status</th>
+<th>Notes</th>
+<th>WhatsApp</th>
+<th>Delete</th>
+</tr>
+
+{% for lead in leads %}
+<tr onclick="openLeadModal(
+'{{ lead[0] }}',
+'{{ lead[1]|e }}',
+'{{ lead[2]|e }}',
+'{{ lead[3]|e }}',
+'{{ lead[4]|e }}',
+'{{ lead[5]|e }}',
+'{{ lead[6]|e }}',
+'{{ lead[7]|e }}',
+'{{ lead[8]|e }}',
+'{{ lead[9]|e }}'
+)" style="cursor:pointer;">
+
+<td>{{ lead[0] }}</td>
+<td>{{ lead[1] }}</td>
+<td>{{ lead[2] }}</td>
+<td>{{ lead[3] }}</td>
+<td>{{ lead[5] }}</td>
+<td>{{ lead[6] }}</td>
+
+<!-- STATUS -->
+<td onclick="event.stopPropagation();">
+<form method="POST" action="/update-status/{{ lead[0] }}">
+<select name="status" onchange="this.form.submit()">
+<option {% if lead[7]=='New' %}selected{% endif %}>New</option>
+<option {% if lead[7]=='Contacted' %}selected{% endif %}>Contacted</option>
+<option {% if lead[7]=='Interested' %}selected{% endif %}>Interested</option>
+<option {% if lead[7]=='Closed' %}selected{% endif %}>Closed</option>
+</select>
+</form>
+</td>
+
+<!-- NOTES -->
+<td onclick="event.stopPropagation();">
+<form method="POST" action="/save-note/{{ lead[0] }}">
+<input type="text"
+name="notes"
+value="{{ lead[9] if lead[9] else '' }}"
+placeholder="Write note">
+
+<button type="submit">Save</button>
+</form>
+</td>
+
+<!-- WHATSAPP -->
+<td onclick="event.stopPropagation();">
+<a href="https://wa.me/91{{ lead[3] }}"
+target="_blank"
+class="wa-btn">
+Chat
+</a>
+</td>
+
+<!-- DELETE -->
+<td onclick="event.stopPropagation();">
+<a href="/delete/{{ lead[0] }}"
+class="delete-btn"
+onclick="return confirm('Delete this lead?')">
+Delete
+</a>
+</td>
+
+</tr>
+{% endfor %}
+
+</table>
+
+</div>
+
+
+<!-- PAGINATION -->
+<div class="pagination">
+
+{% if page > 1 %}
+<a href="/admin-dashboard?page={{ page-1 }}" class="page-btn">
+Previous
+</a>
+{% endif %}
+
+{% for p in range(1, total_pages + 1) %}
+<a href="/admin-dashboard?page={{ p }}"
+class="page-btn {% if p == page %}active-page{% endif %}">
+{{ p }}
+</a>
+{% endfor %}
+
+{% if page < total_pages %}
+<a href="/admin-dashboard?page={{ page+1 }}" class="page-btn">
+Next
+</a>
+{% endif %}
+
+</div>
+
+
+<!-- LEAD DETAIL MODAL -->
+<div id="leadModal" class="lead-modal">
+
+<div class="lead-modal-box">
+
+<span class="close-modal" onclick="closeLeadModal()">
+&times;
+</span>
+
+<h2>Lead Details</h2>
+
+<div id="modalContent"></div>
+
+</div>
+</div>
+
+
+<!-- CHART JS -->
+<script>
+
+
+const statusLabels = [
+{% for row in status_data %}
+'{{ row[0] }}',
+{% endfor %}
+];
+
+const statusCounts = [
+{% for row in status_data %}
+{{ row[1] }},
+{% endfor %}
+];
+
+new Chart(document.getElementById("statusChart"),{
+type:"pie",
+data:{
+labels:statusLabels,
+datasets:[{
+data:statusCounts
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false
+}
+});
+
+
+const monthLabels = [
+{% for row in monthly_data %}
+'{{ row[0] }}',
+{% endfor %}
+];
+
+const monthCounts = [
+{% for row in monthly_data %}
+{{ row[1] }},
+{% endfor %}
+];
+
+new Chart(document.getElementById("monthlyChart"),{
+type:"bar",
+data:{
+labels:monthLabels,
+datasets:[{
+label:"Leads",
+data:monthCounts
+}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false
+}
+});
+
+</script>
+
+<script src="/static/admin.js"></script>
+
+</body>
+</html>

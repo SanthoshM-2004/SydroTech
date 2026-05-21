@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Login</title>
+<link rel="stylesheet" href="/static/login.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+<div class="bg"></div>
+
+<div class="login-box">
+
+    <h1>Sydro CRM</h1>
+    <p>Admin Secure Access</p>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="error">
+            {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+
+        <input type="text"
+               name="username"
+               placeholder="Username"
+               required>
+
+        <div class="password-wrap">
+            <input type="password"
+                   name="password"
+                   id="password"
+                   placeholder="Password"
+                   required>
+
+            <span onclick="togglePassword()">👁</span>
+        </div>
+
+        <label class="remember">
+            <input type="checkbox">
+            Remember Me
+        </label>
+
+        <button type="submit">Login</button>
+
+    </form>
+
+</div>
+
+<script src="static/login.js"></script>
+
+</body>
+</html>
