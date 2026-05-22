@@ -127,14 +127,14 @@ def contact():
         conn.close()
 
         # Send Email Alert
-        send_lead_email(
-            full_name,
-            email,
-            phone,
-            project_type,
-            budget,
-            message
-        )
+        # send_lead_email(
+        #     full_name,
+        #     email,
+        #     phone,
+        #     project_type,
+        #     budget,
+        #     message
+        # )
 
         return render_template(
             "success.html",
