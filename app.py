@@ -34,9 +34,11 @@ def get_db():
 # =====================================
 def send_lead_email(name, email, phone, project, budget, message):
 
-    subject = f"New Lead Received - {name}"
+    try:
 
-    body = f"""
+        subject = f"New Lead Received - {name}"
+
+        body = f"""
 New Lead Submitted
 
 Name: {name}
@@ -49,23 +51,40 @@ Message:
 {message}
 """
 
-    msg = MIMEMultipart()
-    msg["From"] = EMAIL_USER
-    msg["To"] = ALERT_TO
-    msg["Subject"] = subject
+        msg = MIMEMultipart()
 
-    msg.attach(MIMEText(body, "plain"))
+        msg["From"] = EMAIL_USER
+        msg["To"] = ALERT_TO
+        msg["Subject"] = subject
 
-    try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
+        msg.attach(MIMEText(body, "plain"))
+
+        server = smtplib.SMTP(
+            "smtp.gmail.com",
+            587,
+            timeout=10
+        )
+
+        server.ehlo()
+
         server.starttls()
-        server.login(EMAIL_USER, EMAIL_PASS)
+
+        server.ehlo()
+
+        server.login(
+            EMAIL_USER,
+            EMAIL_PASS
+        )
+
         server.send_message(msg)
+
         server.quit()
 
-    except Exception as e:
-        print("Email Error:", e)
+        print("EMAIL SENT SUCCESSFULLY")
 
+    except Exception as e:
+
+        print("EMAIL ERROR:", e)
 
 # =====================================
 # HOME PAGE
@@ -78,24 +97,29 @@ def home():
 # =====================================
 # CONTACT FORM SUBMIT
 # =====================================
+# =====================================
+# CONTACT FORM SUBMIT
+# =====================================
 @app.route("/contact", methods=["POST"])
 def contact():
 
-    full_name = request.form.get("name", "")
-    email = request.form.get("email", "")
-    phone = request.form.get("phone", "")
-    company = request.form.get("company", "")
-    project_type = request.form.get("projectType", "")
-    budget = request.form.get("budget", "")
-    timeline = request.form.get("timeline", "")
-    reference = request.form.get("reference", "")
-    message = request.form.get("message", "")
+    full_name = request.form.get("name", "").strip()
+    email = request.form.get("email", "").strip()
+    phone = request.form.get("phone", "").strip()
+    company = request.form.get("company", "").strip()
+    project_type = request.form.get("projectType", "").strip()
+    budget = request.form.get("budget", "").strip()
+    timeline = request.form.get("timeline", "").strip()
+    reference = request.form.get("reference", "").strip()
+    message = request.form.get("message", "").strip()
 
     try:
 
+        # DATABASE CONNECTION
         conn = get_db()
         cursor = conn.cursor()
 
+        # INSERT LEAD
         cursor.execute("""
             INSERT INTO leads(
                 full_name,
@@ -121,27 +145,24 @@ def contact():
             message
         ))
 
+        # SAVE TO DATABASE
         conn.commit()
 
+        # CLOSE CONNECTION
         cursor.close()
         conn.close()
 
-        # SAFE EMAIL SEND
-        try:
+        # SEND EMAIL SAFELY
+        send_lead_email(
+            full_name,
+            email,
+            phone,
+            project_type,
+            budget,
+            message
+        )
 
-            send_lead_email(
-                full_name,
-                email,
-                phone,
-                project_type,
-                budget,
-                message
-            )
-
-        except Exception as email_error:
-
-            print("EMAIL FAILED:", email_error)
-
+        # SUCCESS PAGE
         return render_template(
             "success.html",
             name=full_name
@@ -149,12 +170,11 @@ def contact():
 
     except Exception as e:
 
-        print("Contact Error:", e)
+        print("CONTACT ERROR:", e)
 
         flash("Something went wrong.")
 
         return redirect("/")
-    
 # =====================================
 # ADMIN LOGIN
 # =====================================
