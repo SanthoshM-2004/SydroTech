@@ -7,8 +7,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from config import *
 
-from config import *
-
 print(DB_HOST)
 
 # =====================================
@@ -94,6 +92,7 @@ def contact():
     message = request.form.get("message", "")
 
     try:
+
         conn = get_db()
         cursor = conn.cursor()
 
@@ -123,18 +122,25 @@ def contact():
         ))
 
         conn.commit()
+
         cursor.close()
         conn.close()
 
-        # Send Email Alert
-        # send_lead_email(
-        #     full_name,
-        #     email,
-        #     phone,
-        #     project_type,
-        #     budget,
-        #     message
-        # )
+        # SAFE EMAIL SEND
+        try:
+
+            send_lead_email(
+                full_name,
+                email,
+                phone,
+                project_type,
+                budget,
+                message
+            )
+
+        except Exception as email_error:
+
+            print("EMAIL FAILED:", email_error)
 
         return render_template(
             "success.html",
@@ -142,11 +148,13 @@ def contact():
         )
 
     except Exception as e:
+
         print("Contact Error:", e)
+
         flash("Something went wrong.")
+
         return redirect("/")
-
-
+    
 # =====================================
 # ADMIN LOGIN
 # =====================================
