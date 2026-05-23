@@ -36,6 +36,8 @@ def send_lead_email(name, email, phone, project, budget, message):
 
     try:
 
+        print("EMAIL FUNCTION STARTED")
+
         subject = f"New Lead Received - {name}"
 
         body = f"""
@@ -59,18 +61,26 @@ Message:
 
         msg.attach(MIMEText(body, "plain"))
 
+        print("CONNECTING SMTP")
+
         server = smtplib.SMTP_SSL(
-        "smtp.gmail.com",
-        465,
-        timeout=10
+            "smtp.gmail.com",
+            465,
+            timeout=20
         )
+
+        print("SMTP CONNECTED")
 
         server.login(
             EMAIL_USER,
             EMAIL_PASS
         )
 
+        print("LOGIN SUCCESS")
+
         server.send_message(msg)
+
+        print("MESSAGE SENT")
 
         server.quit()
 
@@ -78,8 +88,7 @@ Message:
 
     except Exception as e:
 
-        print("EMAIL ERROR:", e)
-
+        print("EMAIL ERROR:", str(e))
 # =====================================
 # HOME PAGE
 # =====================================
