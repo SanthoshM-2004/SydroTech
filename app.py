@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from config import *
 
-print(DB_HOST)
+# print(DB_HOST)
 
 # =====================================
 # APP CONFIG
@@ -456,7 +456,25 @@ def testdb():
     except Exception as e:
         return f"DB Error: {e}"
 
+@app.route("/test-email")
+def test_email():
 
+    try:
+
+        send_lead_email(
+            "Test User",
+            "test@gmail.com",
+            "9999999999",
+            "Website",
+            "5000",
+            "This is a test email"
+        )
+
+        return "EMAIL FUNCTION EXECUTED"
+
+    except Exception as e:
+
+        return f"EMAIL TEST ERROR: {e}"
 # =====================================
 # RUN SERVER
 # =====================================
